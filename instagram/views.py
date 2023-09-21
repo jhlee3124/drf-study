@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import action, api_view
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
@@ -80,6 +82,15 @@ class PostViewSet(ModelViewSet):
     #     ]
     # }
     permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = [
+        "message"
+    ]  # ?search= : queryset 조건절에 추가할 필드 지정. 모델 필드 중 문자열 필드만을 지정, get_search_fields 함수로도 구현 가능
+    ordering_fields = [
+        "id"
+    ]  # ?ordering= : 정렬을 허용할 필드의 화이트리스트. 미지정시 serializer_class에 지정된 필드들
+    ordering = ["id"]  # 디폴트 정렬 지정
+    throttle_classes = UserRateThrottle  # 호출 횟수 제한 설정(넘기면 419 Too Many Requests 응답)
 
     """
     create시에 추가로 저장할 field 설정
